@@ -201,6 +201,8 @@
             </div>
         </div>
         <script>
+            const url = new URL(window.location.href);
+            const apiUrl = url.searchParams.get("api");
             const prompt = document.getElementById("prompt");
             const promptSend = document.getElementById("prompt-send");
             const messages = document.getElementById("messages");
@@ -267,7 +269,7 @@
 
                 window.scrollTo(0, document.body.scrollHeight);
 
-                const response = await fetch("http://192.168.0.102:10000/prompt", {
+                const response = await fetch(`${apiUrl}/prompt`, {
                     method: "POST",
                     body: JSON.stringify({ messages: messagesData.slice(0, -1) }),
                 });
