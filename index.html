@@ -1,0 +1,320 @@
+<!doctype html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" type="image/x-icon" href="static/tabby.jpg">
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/default-dark.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        <title>Tabby</title>
+        <style>
+            @font-face {
+                font-family: 'Idiotic';
+                font-weight: 400;
+                src: url(fonts/Idiotic-Regular.ttf);
+            }
+
+            @font-face {
+                font-family: 'Idiotic';
+                font-weight: 500;
+                src: url(fonts/Idiotic-Medium.ttf);
+            }
+
+            @font-face {
+                font-family: 'Geist Mono';
+                font-weight: 400;
+                src: url(fonts/GeistMono-Regular.ttf);
+            }
+
+            html, body {
+                font-family: 'Idiotic', sans-serif;
+                width: 100%;
+                height: 100%;
+                color: #ffffff;
+                background-color: #131314;
+                margin: 0px;
+            }
+
+            .column {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .row {
+                display: flex;
+                flex-direction: row;
+            }
+
+            .gradient {
+                background: linear-gradient(74deg, #ffc15d, #ff5757);
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+                -webkit-background-clip: text;
+            }
+
+            .diluted {
+                color: #444746;
+            }
+
+            #prompt {
+                height: 21px;
+                max-height: 200px;
+                background-color: #1e1f20;
+                border: none;
+                border-radius: 32px;
+                color: #ffffff;
+                font-family: inherit;
+                font-size: 16px;
+                font-weight: 500;
+                padding: 16px;
+                outline: 0px;
+                padding-right: 54px;
+            }
+
+            #prompt-send {
+                background-color: #00000000;
+                position: absolute;
+                right: 16px;
+                top: 14px;
+                border: none;
+                cursor: pointer;
+            }
+
+            .prompt-container {
+                background-color: #131314;
+                width: 100%;
+                max-width: 800px;
+                position: sticky;
+                bottom: 0px;
+                margin: auto;
+            }
+
+            #messages {
+                width: 100%;
+                max-width: 800px;
+                align-self: center;
+            }
+
+            .card {
+                background-color: #241a1a;
+                border-radius: 16px;
+                padding: 16px;
+            }
+
+            .limit-180px {
+                width: 180px;
+            }
+
+            .clickable {
+                user-select: none;
+                cursor: pointer;
+            }
+
+            .profile-picture {
+                width: 32px;
+                height: 32px;
+                border-radius: 64px;
+            }
+
+            .hidden {
+                display: none;
+            }
+
+            .suggestion-title {
+                font-size: 20px;
+                font-weight: 500;
+                letter-spacing: -1px;
+            }
+
+            .loader {
+                width: 16px;
+                height: 16px;
+                border: 2px solid #ffffff;
+                border-bottom-color: transparent;
+                border-radius: 50%;
+                box-sizing: border-box;
+                animation: rotation 1s cubic-bezier(.46,.03,.52,.96) infinite;
+                margin: 8px;
+            }
+
+            @keyframes rotation {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .hljs {
+                color: #ffffff;
+                background-color: #1e1f20;
+            }
+
+            p {
+                margin: 0px;
+            }
+
+            code.hljs {
+                width: calc(100% - 2em);
+                border-radius: 16px;
+                font-family: 'Geist Mono', monospace;
+            }
+
+            code {
+                font-family: 'Geist Mono', monospace;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="column" style="height: 100%;">
+            <div class="row" style="position: sticky; top: 0px; padding: 16px; background-color: #131314;">
+                <span class="gradient" style="font-size: 24px; font-weight: 500; letter-spacing: -1px;">Tabby</span>
+                <span class="diluted">alpha</span>
+            </div>
+            <div id="messages" class="column" style="flex-grow: 1;">
+                <div id="welcome">
+                    <span class="gradient" style="font-size: 48px; font-weight: 500; letter-spacing: -2px;">Hello!</span><br>
+                    <span class="diluted" style="font-size: 36px; font-weight: 500; letter-spacing: -2px;">Type anything to get started with Tabby</span>
+                    <div class="row" style="gap: 16px; justify-content: center; padding-top: 16px;">
+                        <div class="column card clickable limit-180px" name="suggestion-card">
+                            <span class="gradient suggestion-title">I'm feeling sad</span>
+                            Tabby can help you when you are feeling down
+                        </div>
+                        <div class="column card clickable limit-180px" name="suggestion-card">
+                            <span class="gradient suggestion-title">I need help with coding</span>
+                            If you need any help regarding coding, Tabby is here to help you
+                        </div>
+                        <div class="column card clickable limit-180px" name="suggestion-card">
+                            <span class="gradient suggestion-title">Let's have a very cute chat :3</span>
+                            If you want to...
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="prompt-container column">
+                <textarea id="prompt" placeholder="Enter prompt here" style="resize: none;"></textarea>
+                <button id="prompt-send">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#ffffff"><path d="M120-160v-640l760 320-760 320Zm80-120 474-200-474-200v140l240 60-240 60v140Zm0 0v-400 400Z"/></svg>
+                </button>
+                <span class="diluted" style="align-self: center; padding: 8px;">Note: Your session is not saved</span>
+            </div>
+        </div>
+        <script>
+            const prompt = document.getElementById("prompt");
+            const promptSend = document.getElementById("prompt-send");
+            const messages = document.getElementById("messages");
+            const welcome = document.getElementById("welcome");
+            const messagesData = [];
+            let processing = false;
+
+            function recalculatePromptHeight() {
+                prompt.style.height = "21px";
+                prompt.style.height = `${prompt.scrollHeight - 32}px`;
+            }
+
+            function renderMessage(index) {
+                if (document.getElementById(`m${index}`) === null) {
+                    let profilePicture = "static/tabby.jpg";
+                    if (messagesData[index]["role"] == "user") {
+                        profilePicture = "static/user.jpg";
+                    }
+
+                    messages.innerHTML += `
+                        <div id="m${index}" class="row" style="padding: 16px; overflow-wrap: anywhere;">
+                            <div class="column">
+                                <img class="profile-picture" src="${profilePicture}">
+                                <div class="loader hidden" id="m${index}loader"></div>
+                            </div>
+                            <span id="m${index}content" style="width: calc(100% - 48px); padding-left: 8px; padding-top: 4px;"></span>
+                        </div>
+                    `;
+                }
+
+                const content = document.getElementById(`m${index}content`);
+                const loader = document.getElementById(`m${index}loader`);
+                content.innerHTML = marked.parse(messagesData[index].content, { breaks: true });
+                hljs.highlightAll();
+                if (messagesData[index].role === "assistant" && processing) {
+                    loader.classList.remove("hidden");
+                } else if (!loader.classList.contains("hidden")) {
+                    loader.classList.add("hidden");
+                }
+            }
+
+            async function sendPrompt(promptText) {
+                if (processing) {
+                    alert("Wait for a prompt to finish processing");
+                    return;
+                }
+
+                if (!welcome.classList.contains("hidden")) {
+                    welcome.classList.add("hidden");
+                }
+
+                processing = true;
+                messagesData.push({
+                    role: "user",
+                    content: promptText,
+                });
+                renderMessage(messagesData.length - 1);
+
+                messagesData.push({
+                    role: "assistant",
+                    content: "",
+                });
+                renderMessage(messagesData.length - 1);
+
+                window.scrollTo(0, document.body.scrollHeight);
+
+                const response = await fetch("http://192.168.0.102:10000/prompt", {
+                    method: "POST",
+                    body: JSON.stringify({ messages: messagesData.slice(0, -1) }),
+                });
+                const reader = response.body.getReader();
+                let stringBuffer = "";
+                while (true) {
+                    let stop = false;
+                    const data = await reader.read();
+                    stringBuffer += new TextDecoder().decode(data.value);
+                    const messages = stringBuffer.split("\n");
+                    while (messages.length > 0) {
+                        const messageData = messages.shift();
+                        if (messageData === "") {
+                            continue;
+                        }
+                        const message = JSON.parse(messageData);
+                        if (message.stop) {
+                            stop = true;
+                            break;
+                        }
+                        messagesData[messagesData.length - 1].content += message.token;
+                        renderMessage(messagesData.length - 1);
+                        stringBuffer = messages.join("\n");
+                    }
+                    if (stop || (messages.length === 0 && data.done)) {
+                        break;
+                    }
+                }
+                processing = false;
+                renderMessage(messagesData.length - 1);
+            }
+
+            promptSend.addEventListener("click", () => {
+                const promptText = prompt.value;
+                prompt.value = "";
+                sendPrompt(promptText);
+                recalculatePromptHeight();
+            });
+
+            prompt.addEventListener("input", recalculatePromptHeight);
+
+            for (const card of document.getElementsByName("suggestion-card")) {
+                card.addEventListener("click", () => {
+                    const prompt = card.getElementsByClassName("suggestion-title")[0].innerText;
+                    sendPrompt(prompt);
+                });
+            }
+        </script>
+    </body>
+</html>
