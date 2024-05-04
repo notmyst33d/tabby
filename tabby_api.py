@@ -14,17 +14,12 @@ class HuggingfaceAdapter:
     def create_chat_completion(self, *args, **kwargs):
         if kwargs.get("top_k"):
             del kwargs["top_k"]
-        kwargs["max_tokens"] = 16384
-        if kwargs.get("stream", False):
-            for completion in self.client.chat_completion(*args, **kwargs):
-                if not completion.choices:
-                    continue
-                yield {"choices": [{"delta": {"content": completion.choices[0].delta.content}, "finish_reason": completion.choices[0].finish_reason}]}
-        else:
-            completion = self.client.chat_completion(*args, **kwargs)
-            print(completion)
-            yield {"choices": [{"delta": {"content": completion.choices[0].message.content}, "finish_reason": None}]}
-            yield {"choices": [{"delta": {"content": None}, "finish_reason": completion.choices[0].finish_reason}]}
+        kwargs["max_tokens"] = 12480
+        kwargs["stream"] = True
+        for completion in self.client.chat_completion(*args, **kwargs):
+            if not completion.choices:
+                yield {"error": "Context limit reached"}
+            yield {"choices": [{"delta": {"content": completion.choices[0].delta.content}, "finish_reason": completion.choices[0].finish_reason}]}
 
 @routes.post("/prompt")
 async def post_prompt(request: Request):
@@ -53,7 +48,10 @@ async def post_prompt(request: Request):
     )
 
     for completion in stream:
-        print(completion)
+        if response.get("error"):
+            await response.write(json.dumps(response).encode("utf-8") + b"\n")
+            break
+
         await response.write(json.dumps({
             "token": completion["choices"][0]["delta"].get("content", ""),
             "stop": completion["choices"][0]["finish_reason"] != None,

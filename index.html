@@ -35,6 +35,14 @@
                 margin: 0px;
             }
 
+            html {
+                overflow: hidden;
+            }
+
+            body {
+                overflow: scroll;
+            }
+
             .column {
                 display: flex;
                 flex-direction: column;
@@ -167,11 +175,11 @@
         </style>
     </head>
     <body>
+        <div class="row" style="position: sticky; top: 0px; padding: 16px; background-color: #131314;">
+            <span class="gradient" style="font-size: 24px; font-weight: 500; letter-spacing: -1px;">Tabby</span>
+            <span class="diluted">alpha</span>
+        </div>
         <div class="column" style="height: 100%;">
-            <div class="row" style="position: fixed; top: 0px; padding: 16px; background-color: #131314;">
-                <span class="gradient" style="font-size: 24px; font-weight: 500; letter-spacing: -1px;">Tabby</span>
-                <span class="diluted">alpha</span>
-            </div>
             <div id="messages" class="column" style="flex-grow: 1;">
                 <div id="welcome">
                     <span class="gradient" style="font-size: 48px; font-weight: 500; letter-spacing: -2px;">Hello!</span><br>
@@ -202,7 +210,12 @@
         </div>
         <script>
             const url = new URL(window.location.href);
-            const apiUrl = url.searchParams.get("api");
+            const apiUrl = url.searchParams.get("api") ?? "https://tabbyllm.duckdns.org";
+
+            if (apiUrl === "https://tabbyllm.duckdns.org") {
+                alert("Hello! Welcome to Tabby!\nPlease, don't overuse it, or I will be sad :(\n\n* Tabby uses Hugging Face Inference API, therefore your data is under the Privacy Policy of Hugging Face.\n* I do NOT collect ANY data from Tabby.");
+            }
+
             const prompt = document.getElementById("prompt");
             const promptSend = document.getElementById("prompt-send");
             const messages = document.getElementById("messages");
@@ -286,6 +299,15 @@
                             continue;
                         }
                         const message = JSON.parse(messageData);
+                        if (message.error !== undefined) {
+                            alert(message.error);
+                            document.getElementById(`m${messagesData.length - 1}`).remove();
+                            document.getElementById(`m${messagesData.length - 2}`).remove();
+                            messagesData.pop();
+                            messagesData.pop();
+                            stop = true;
+                            break;
+                        }
                         if (message.stop) {
                             stop = true;
                             break;
