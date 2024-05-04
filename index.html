@@ -35,14 +35,6 @@
                 margin: 0px;
             }
 
-            html {
-                overflow: hidden;
-            }
-
-            body {
-                overflow: scroll;
-            }
-
             .column {
                 display: flex;
                 flex-direction: column;
@@ -92,15 +84,15 @@
                 background-color: #131314;
                 width: 100%;
                 max-width: 800px;
-                position: sticky;
-                bottom: 0px;
-                margin: auto;
+                position: relative;
+                align-self: center;
             }
 
             #messages {
                 width: 100%;
                 max-width: 800px;
                 align-self: center;
+                overflow-y: auto;
             }
 
             .card {
@@ -175,11 +167,11 @@
         </style>
     </head>
     <body>
-        <div class="row" style="position: sticky; top: 0px; padding: 16px; background-color: #131314;">
-            <span class="gradient" style="font-size: 24px; font-weight: 500; letter-spacing: -1px;">Tabby</span>
-            <span class="diluted">alpha</span>
-        </div>
         <div class="column" style="height: 100%;">
+            <div class="row" style="padding: 16px; background-color: #131314;">
+                <span class="gradient" style="font-size: 24px; font-weight: 500; letter-spacing: -1px;">Tabby</span>
+                <span class="diluted">alpha</span>
+            </div>
             <div id="messages" class="column" style="flex-grow: 1;">
                 <div id="welcome">
                     <span class="gradient" style="font-size: 48px; font-weight: 500; letter-spacing: -2px;">Hello!</span><br>
