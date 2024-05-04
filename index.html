@@ -272,7 +272,7 @@
                 });
                 renderMessage(messagesData.length - 1);
 
-                window.scrollTo(0, document.body.scrollHeight);
+                messages.scrollTo(0, messages.scrollHeight);
 
                 const response = await fetch(`${apiUrl}/prompt`, {
                     method: "POST",
